@@ -590,14 +590,14 @@ class Session(object):
     )
     return res
 
-  def get_flows(self, name):
-    """Get list of flows corresponding to a project
+  def get_workflows(self, name):
+    """Get list of workflows corresponding to a project
 
     :param name: Project name
 
     """
     self._logger.debug(
-      'Fetching flows in project %s', name
+      'Fetching workflows in project %s', name
     )
     try:
       res = self._request(
@@ -609,7 +609,7 @@ class Session(object):
         },
       )
     except HTTPError:
-      raise AzkabanError('No flows found in project %s', name)
+      raise AzkabanError('No workflows found in project %s', name)
     else:
       try:
         return _extract_json(res)
