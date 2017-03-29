@@ -331,6 +331,19 @@ class Session(object):
       self._logger.info('Execution %s cancelled.', exec_id)
     return res
 
+  def get_projects(self):
+    """Get a list of all projects
+
+    """
+    self._logger.debug('Getting all projects')
+    return _extract_json(self._request(
+      method='GET',
+      endpoint='index',
+      params={
+        'ajax': 'fetchallprojects',
+      },
+    ))
+
   def create_project(self, name, description):
     """Create project.
 
@@ -488,6 +501,31 @@ class Session(object):
       data=request_data,
     ))
     self._logger.info('Unscheduled project %s workflow %s.', name, flow)
+    return res
+
+  def schedule_cron_workflow(self, name, flow, cron_expression):
+    """Schedule a cron workflow.
+
+    :param name: Project name.
+    :param flow: Name of flow in project.
+    :param cron_expression: A CRON expression comprising 6 or 7 fields
+      separated by white space that represents a set of times in Quartz Cron Format.
+
+    """
+    self._logger.debug('Scheduling project %s workflow %s.', flow, name)
+    request_data = {
+      'ajax': 'scheduleCronFlow',
+      'projectName': name,
+      'flow': flow,
+      'cronExpression': cron_expression,
+    }
+    res = _extract_json(self._request(
+      method='POST',
+      endpoint='schedule',
+      params=request_data,
+    ))
+    print self.url
+    self._logger.info('Scheduled project %s workflow %s.', name, flow)
     return res
 
   def get_schedule(self, name, flow):
