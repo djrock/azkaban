@@ -503,13 +503,14 @@ class Session(object):
     self._logger.info('Unscheduled project %s workflow %s.', name, flow)
     return res
 
-  def schedule_cron_workflow(self, name, flow, cron_expression):
+  def schedule_cron_workflow(self, name, flow, cron_expression, **kwargs):
     """Schedule a cron workflow.
 
     :param name: Project name.
     :param flow: Name of flow in project.
     :param cron_expression: A CRON expression comprising 6 or 7 fields
       separated by white space that represents a set of times in Quartz Cron Format.
+    :param \*\*kwargs: See :meth:`run_workflow` for documentation.
 
     """
     self._logger.debug('Scheduling project %s workflow %s.', flow, name)
@@ -519,6 +520,7 @@ class Session(object):
       'flow': flow,
       'cronExpression': cron_expression,
     }
+    request_data.update(self._run_options(name, flow, **kwargs))
     res = _extract_json(self._request(
       method='POST',
       endpoint='schedule',
@@ -555,6 +557,32 @@ class Session(object):
         'Failed to get schedule. Check that the schedule exists.'
       )
     return res['schedule']
+
+  def get_sla(self, schedule_id):
+    """Get SLA information.
+
+    :param schedule_id: Schedule Id - obtainable from get_schedule
+
+    """
+    self._logger.debug(
+      'Retrieving SLA for schedule ID %s.', schedule_id
+    )
+    res = _extract_json(self._request(
+      method='GET',
+      endpoint='schedule',
+      params={
+        'ajax': 'slaInfo',
+        'scheduleId': schedule_id
+      },
+    ))
+    self._logger.info(
+      'Retrieved SLA for schedule ID %s.', schedule_id
+    )
+    if 'settings' not in res:
+      raise AzkabanError(
+        'Failed to get SLA. Check that an SLA exists.'
+      )
+    return res
 
   def _get_project_id(self, name):
     """Fetch the id of a project.
