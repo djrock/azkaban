@@ -584,6 +584,36 @@ class Session(object):
       )
     return res
 
+  def set_sla(self, schedule_id, email, settings):
+    """Set SLA for a workflow schedule
+
+    :param schedule_id: Schedule id
+    :param email: Array of emails for receiving notifications
+    :param settings: Array of Comma delimited string of SLA settings
+      consisting of
+        job name - blank for full workflow
+        rule - SUCCESS or FINISH
+        duration - specified in hh:mm
+        email action - bool
+        kill action - bool
+
+    """
+    self._logger.debug('Setting SLA for schedule Id %s.', schedule_id)
+    request_data = {
+      'ajax': 'setSla',
+      'scheduleId': schedule_id,
+      'slaEmails': ','.join(email),
+    }
+    for k, setting in enumerate(settings):
+      request_data['settings['+str(k)+']'] = setting
+    res = _extract_json(self._request(
+      method='POST',
+      endpoint='schedule',
+      data=request_data,
+    ))
+    self._logger.info('Set SLAs for schedule Id %s.', schedule_id)
+    return res
+
   def _get_project_id(self, name):
     """Fetch the id of a project.
 
