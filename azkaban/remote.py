@@ -526,7 +526,6 @@ class Session(object):
       endpoint='schedule',
       params=request_data,
     ))
-    print self.url
     self._logger.info('Scheduled project %s workflow %s.', name, flow)
     return res
 
